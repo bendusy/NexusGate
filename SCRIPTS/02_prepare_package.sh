@@ -220,6 +220,66 @@ echo > ./feeds/packages/utils/watchcat/files/watchcat.config
 # 默认开启 Irqbalance
 #sed -i "s/enabled '0'/enabled '1'/g" feeds/packages/utils/irqbalance/files/irqbalance.config
 
+### Tailscale 优化部分 ###
+# 添加 Tailscale 防火墙优化
+cat > ./package/network/config/firewall4/patches/999-tailscale-optimization.patch <<'EOF'
+--- a/root/usr/share/nftables.d/table-pre.nft
++++ b/root/usr/share/nftables.d/table-pre.nft
+@@ -11,6 +11,12 @@ table inet fw4 {
+ 		type filter hook forward priority filter; policy drop;
+ 	}
+ 
++	# Tailscale 优化: 允许所有 Tailscale 流量通过
++	chain ts_forward {
++		iifname "tailscale*" accept
++		oifname "tailscale*" accept
++	}
++
+ 	chain input {
+ 		type filter hook input priority filter; policy drop;
+ 
+@@ -20,6 +26,10 @@ table inet fw4 {
+ 		ct state established,related accept
+ 		ct state invalid drop
+ 
++		# Tailscale 优化: 允许所有 Tailscale 流量
++		iifname "tailscale*" accept
++		oifname "tailscale*" accept
++
+ 		tcp flags & (fin|syn|rst|ack) == syn ct state new jump syn_flood
+ 
+ 		jump input_wan
+@@ -31,6 +41,9 @@ table inet fw4 {
+ 		type filter hook forward priority filter; policy drop;
+ 
+ 		ct state established,related accept
++
++		# Tailscale 优化: 跳转到 Tailscale 专用链
++		jump ts_forward
+ 		
+ 		ct state invalid drop
+ 
+EOF
+
+# 添加 Tailscale 性能优化配置
+mkdir -p ./package/base-files/files/etc/sysctl.d/
+cat > ./package/base-files/files/etc/sysctl.d/99-tailscale.conf <<'EOF'
+# Tailscale 网络性能优化
+net.ipv4.ip_forward=1
+net.ipv6.conf.all.forwarding=1
+net.core.rmem_max=2500000
+net.core.wmem_max=2500000
+
+# 连接跟踪优化
+net.netfilter.nf_conntrack_max=1000000
+net.netfilter.nf_conntrack_buckets=200000
+net.netfilter.nf_conntrack_tcp_timeout_established=86400
+
+# UDP 性能优化
+net.core.netdev_max_backlog=10000
+net.core.somaxconn=10000
+EOF
+
 ### 最后的收尾工作 ###
 # Lets Fuck
 mkdir -p package/base-files/files/usr/bin

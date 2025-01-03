@@ -1,0 +1,33 @@
+# 基础配置
+config defaults
+	option syn_flood '1'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+	option flow_offloading '1'
+	option flow_offloading_hw '1'
+
+# Tailscale 专用区域
+config zone 'tailscale'
+	option name 'tailscale'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	option device 'tailscale0'
+	option masq '1'
+	option mtu_fix '1'
+
+# Tailscale 到 LAN 的转发规则
+config forwarding
+	option src 'tailscale'
+	option dest 'lan'
+
+# LAN 到 Tailscale 的转发规则
+config forwarding
+	option src 'lan'
+	option dest 'tailscale'
+
+# Tailscale 到 WAN 的转发规则
+config forwarding
+	option src 'tailscale'
+	option dest 'wan' 

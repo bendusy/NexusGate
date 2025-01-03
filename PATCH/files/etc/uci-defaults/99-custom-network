@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# 设置网络配置
+uci set network.lan.ipaddr='10.11.12.1'
+uci set network.lan.netmask='255.255.255.0'
+uci set network.lan.proto='static'
+uci commit network
+
+# 设置主机名映射，解决安卓原生 TV 无法联网的问题
+uci add dhcp domain
+uci set "dhcp.@domain[-1].name=time.android.com"
+uci set "dhcp.@domain[-1].ip=203.107.6.88"
+uci commit dhcp
+
+# 添加 tailscale 安装脚本
+cat > /usr/bin/install-tailscale.sh <<'EOF'
+#!/bin/sh
+
+# 使用 ghproxy.cc 加速下载
+wget -O- https://ghproxy.cc/https://raw.githubusercontent.com/CH3NGYZ/tailscale-openwrt/chinese_mainland/install.sh | sh
+
+# 设置防火墙模式
+if [ -f "/etc/init.d/tailscale" ]; then
+    # 添加环境变量到启动脚本
+    sed -i '/^START=.*/a export TS_DEBUG_FIREWALL_MODE=auto' /etc/init.d/tailscale
+    
+    # 启动服务
+    /etc/init.d/tailscale enable
+    /etc/init.d/tailscale start
+fi
+EOF
+
+# 设置执行权限并执行安装脚本
+chmod +x /usr/bin/install-tailscale.sh
+/usr/bin/install-tailscale.sh
+
+exit 0 
