@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# 更新系统信息显示
+sed -i 's/%D/%D/g' /etc/banner
+sed -i 's/%C/by bendusy/g' /etc/banner
+
+# 设置登录信息显示
+echo "Welcome to NexusGate!" > /etc/motd
+echo "GitHub: https://github.com/bendusy/NexusGate" >> /etc/motd
+echo "" >> /etc/motd
+
+exit 0 

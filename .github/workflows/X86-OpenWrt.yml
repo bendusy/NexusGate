@@ -1,4 +1,4 @@
-name: X86-OpenWrt
+name: NexusGate-X86
 
 on:
 #  schedule:
@@ -46,7 +46,6 @@ jobs:
         df -h
     - name: Prepare Mixedwrt
       run: |
-        sudo chown -R runner:runner /home/runner/work/YAOF
         cp -r ./SCRIPTS/X86/. ./SCRIPTS/
         cp -r ./SCRIPTS/. ./
         /bin/bash 01_get_ready.sh
@@ -99,7 +98,6 @@ jobs:
       id: compileopenwrt
       continue-on-error: true
       run: |
-        #echo | make kernel_oldconfig -j$(($(nproc) + 1)) 
         make -j$(($(nproc) + 1)) package/network/utils/nftables/refresh V=s
         IGNORE_ERRORS=1 make -j$(($(nproc) + 1))
         echo $?
@@ -121,15 +119,15 @@ jobs:
         gzip -d *.gz && exit 0
         gzip --best *.img
         ls -Ahl
-        sha256sum openwrt*x86* | tee X86-GC404-$(date +%Y-%m-%d)-${{ env.latest_release }}.sha256sum
-        zip X86-GC404-$(date +%Y-%m-%d)-${{ env.latest_release }}-ext4.zip *ext4-combined*
-        zip X86-GC404-$(date +%Y-%m-%d)-${{ env.latest_release }}-sfs.zip *squashfs-combined*
+        sha256sum openwrt*x86* | tee NexusGate-$(date +%Y-%m-%d)-${{ env.latest_release }}.sha256sum
+        zip NexusGate-$(date +%Y-%m-%d)-${{ env.latest_release }}-ext4.zip *ext4-combined*
+        zip NexusGate-$(date +%Y-%m-%d)-${{ env.latest_release }}-sfs.zip *squashfs-combined*
         ls -Ahl
     - name: Create release
       id: create_release
       uses: ncipollo/release-action@main
       with:
-        name: OpenWRT-${{ env.latest_release }}
+        name: NexusGate-${{ env.latest_release }}
         allowUpdates: true
         prerelease: false
         tag: ${{ env.latest_release }}

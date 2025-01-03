@@ -1,8 +1,8 @@
-# TailWrt for Mihomo
+# NexusGate
 
 <h1 align="center">请勿用于商业用途!!!</h1>
 
-基于 OpenWrt 24.10 的定制固件，专注于 x86 平台和 Tailscale 网络优化。
+基于 OpenWrt 24.10 的定制固件，专注于 x86 平台和 Tailscale 网络优化。NexusGate 旨在提供一个高性能、易用的网络连接解决方案。
 
 ## 特性
 
